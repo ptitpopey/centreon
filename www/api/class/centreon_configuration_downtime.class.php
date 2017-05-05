@@ -69,33 +69,34 @@ class CentreonConfigurationDowntime extends CentreonConfigurationObjects
         $queryValues = array();
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $q = '';
+            $queryValues['dtName'] = '%%';
         } else {
-            $q = $this->arguments['q'];
+            $queryValues['dtName'] = '%' . $this->arguments['q'] . '%';
         }
 
-        $queryDowntime = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dt.dt_name, dt.dt_id "
-            . "FROM downtime dt "
-            . "WHERE dt.dt_name LIKE :name "
-            . "ORDER BY dt.dt_name";
-        $queryValues[':name'] = '%' . $q . '%';
+        $queryDowntime = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dt.dt_name, dt.dt_id ' .
+            'FROM downtime dt ' .
+            'WHERE dt.dt_name LIKE :dtName ' .
+            'ORDER BY dt.dt_name';
 
         $stmt = $this->pearDB->prepare($queryDowntime);
-        $this->pearDB->execute($stmt, $queryValues);
+        $stmt->bindParam(':dtName', $queryValues["dtName"], PDO::PARAM_STR);
+        $dbResult = $stmt->execute();
 
-        $total = $stmt->rowCount();
+        if (!$dbResult) {
+            throw new \Exception("An error occured");
+        }
 
         $downtimeList = array();
-        while ($data = $stmt->fetch()) {
+        while ($data = $stmt->fetchRow()) {
             $downtimeList[] = array(
                 'id' => htmlentities($data['dt_id']),
                 'text' => $data['dt_name']
             );
         }
-
         return array(
             'items' => $downtimeList,
-            'total' => $total
+            'total' => $stmt->rowCount()
         );
     }
 }
