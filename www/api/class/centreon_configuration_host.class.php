@@ -115,7 +115,7 @@ class CentreonConfigurationHost extends CentreonConfigurationObjects
                 foreach ($virtualHosts as $vHostId => $vHostName) {
                     $virtualHostCondition .= 'UNION ALL ' .
                         "(SELECT :hostNameTable$vHostId as host_name, :virtualHostId$vHostId as host_id ) ";
-                    $queryValues['virtualHost'][$vHostId] = (string)$vHostName;
+                    $queryValues['virtualHost'][$vHostId] = $vHostName;
                 }
             }
         }
@@ -127,35 +127,32 @@ class CentreonConfigurationHost extends CentreonConfigurationObjects
         if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
             $offset = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
             $query .= 'LIMIT :offset, :limit';
-            $queryValues['offset'] = (int)$offset;
-            $queryValues['limit'] = (int)$this->arguments['page_limit'];
+            $queryValues['offset'] = $offset;
+            $queryValues['limit'] = $this->arguments['page_limit'];
         }
 
         $stmt = $this->pearDB->prepare($query);
         $stmt->bindParam(':hostName', $queryValues['hostName'], PDO::PARAM_STR);
 
-        if(isset($queryValues['hostgroup'])){
-            foreach ($queryValues['hostgroup'] as $hgId => $hgValue){
-                $stmt->bindParam(':hostgroup'.$hgId, $hgValue, PDO::PARAM_STR);
+        if (isset($queryValues['hostgroup'])) {
+            foreach ($queryValues['hostgroup'] as $hgId => $hgValue) {
+                $stmt->bindParam(':hostgroup' . $hgId, $hgValue, PDO::PARAM_INT);
             }
         }
-        if(isset($queryValues['virtualHost'])){
-            foreach ($queryValues['virtualHost'] as $vhId => $vhValue){
-                $stmt->bindParam(':hostNameTable'.$vhId, $vhValue, PDO::PARAM_STR);
-                $stmt->bindParam(':virtualHostId'.$vhId, $vhId, PDO::PARAM_INT);
+        if (isset($queryValues['virtualHost'])) {
+            foreach ($queryValues['virtualHost'] as $vhId => $vhValue) {
+                $stmt->bindParam(':hostNameTable' . $vhId, $vhValue, PDO::PARAM_STR);
+                $stmt->bindParam(':virtualHostId' . $vhId, $vhId, PDO::PARAM_INT);
             }
         }
-
-
-
-
-        $stmt->bindParam(':commandName', $queryValues['commandName'], PDO::PARAM_STR);
-        $stmt->bindParam(':commandName', $queryValues['commandName'], PDO::PARAM_STR);
-
-
-
-        $dbResult = $this->pearDB->execute($stmt, $queryValues);
-        $total = $this->pearDB->numberRows();
+        if (isset($queryValues['offset'])) {
+            $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
+        }
+        $dbResult = $stmt->execute();
+        if (!$dbResult) {
+            throw new \Exception("An error occured");
+        }
 
         $hostList = array();
         while ($data = $dbResult->fetchRow()) {
@@ -167,7 +164,7 @@ class CentreonConfigurationHost extends CentreonConfigurationObjects
 
         return array(
             'items' => $hostList,
-            'total' => $total
+            'total' => $stmt->rowCount()
         );
     }
 
