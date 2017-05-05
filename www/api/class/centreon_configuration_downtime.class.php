@@ -42,13 +42,12 @@ class CentreonConfigurationDowntime extends CentreonConfigurationObjects
 {
 
     /**
-     *
-     * @var type
+     * @var CentreonDB
      */
     protected $pearDBMonitoring;
 
     /**
-     *
+     * CentreonConfigurationDowntime constructor.
      */
     public function __construct()
     {
@@ -61,8 +60,8 @@ class CentreonConfigurationDowntime extends CentreonConfigurationObjects
     }
 
     /**
-     *
      * @return array
+     * @throws Exception
      */
     public function getList()
     {

@@ -39,7 +39,7 @@ require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 class CentreonConfigurationGraphcurve extends CentreonConfigurationObjects
 {
     /**
-     * Constructor
+     * CentreonConfigurationGraphcurve constructor.
      */
     public function __construct()
     {
@@ -47,9 +47,8 @@ class CentreonConfigurationGraphcurve extends CentreonConfigurationObjects
     }
 
     /**
-     *
-     * @param array $args
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
