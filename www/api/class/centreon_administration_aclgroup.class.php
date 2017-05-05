@@ -38,8 +38,8 @@ require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 class CentreonAdministrationAclgroup extends CentreonConfigurationObjects
 {
     /**
-     *
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
@@ -68,22 +68,24 @@ class CentreonAdministrationAclgroup extends CentreonConfigurationObjects
             $range;
         $stmt = $this->pearDB->prepare($query);
         $stmt->bindParam(':aclGroup', $queryValues["aclGroup"], PDO::PARAM_STR);
-        $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
-        $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
-        $dbResult = $this->pearDB->execute($stmt, $queryValues);
+        if (isset($queryValues["offset"])) {
+            $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
+        }
+        $dbResult = $stmt->execute();
         if (!$dbResult) {
             throw new \Exception("An error occured");
         }
-        $aclgroupList = array();
+        $aclGroupList = array();
         while ($data = $stmt->fetch()) {
-            $aclgroupList[] = array(
+            $aclGroupList[] = array(
                 'id' => $data['acl_group_id'],
                 'text' => $data['acl_group_name']
             );
         }
 
         return array(
-            'items' => $aclgroupList,
+            'items' => $aclGroupList,
             'total' => $stmt->rowCount()
         );
     }
