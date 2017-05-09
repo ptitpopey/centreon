@@ -89,7 +89,7 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
 
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $queryValues['hcName'] = '';
+            $queryValues['hcName'] = '%%';
         } else {
             $queryValues['hcName'] = '%' . $this->arguments['q'] . '%';
         }

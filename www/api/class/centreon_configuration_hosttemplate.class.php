@@ -61,7 +61,7 @@ class CentreonConfigurationHosttemplate extends CentreonConfigurationObjects
 
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $queryValues['hostName'] = '';
+            $queryValues['hostName'] = '%%';
         } else {
             $queryValues['hostName'] = '%' . $this->arguments['q'] . '%';
         }

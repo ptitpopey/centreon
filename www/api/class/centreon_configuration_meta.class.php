@@ -68,7 +68,7 @@ class CentreonConfigurationMeta extends CentreonConfigurationObjects
 
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $queryValues['name'] = '';
+            $queryValues['name'] = '%%';
         } else {
             $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }

@@ -54,6 +54,7 @@ class CentreonConfigurationPoller extends CentreonConfigurationObjects
 
     /**
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
@@ -70,7 +71,7 @@ class CentreonConfigurationPoller extends CentreonConfigurationObjects
 
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $queryValues['name'] = '';
+            $queryValues['name'] = '%%';
         } else {
             $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }
