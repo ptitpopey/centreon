@@ -37,57 +37,59 @@
 require_once _CENTREON_PATH_ . "/www/class/centreonDB.class.php";
 require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 
-class CentreonConfigurationTimezone extends CentreonConfigurationObjects
+class CentreonConfigurationTimeperiod extends CentreonConfigurationObjects
 {
     /**
-     * Constructor
+     * CentreonConfigurationTimeperiod constructor.
      */
     public function __construct()
     {
         parent::__construct();
     }
-    
+
     /**
-     *
      * @return array
      */
     public function getList()
     {
+        $queryValues = array();
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $q = '';
+            $queryValues['name'] = '%%';
         } else {
-            $q = $this->arguments['q'];
+            $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }
-
+        $queryTimePeriod = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT tp_id, tp_name ' .
+            'FROM timeperiod ' .
+            'WHERE tp_name LIKE ? ' .
+            'ORDER BY tp_name ';
         if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
-            $limit = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
-            $range = 'LIMIT ' . $limit . ',' . $this->arguments['page_limit'];
-        } else {
-            $range = '';
+            $offset = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
+            $queryTimePeriod .= 'LIMIT :offset,:limit';
+            $queryValues['offset'] = $offset;
+            $queryValues['limit'] = $this->arguments['page_limit'];
         }
-        
-        $queryTimezone = "SELECT SQL_CALC_FOUND_ROWS DISTINCT timezone_id, timezone_name "
-            . " FROM timezone "
-            . " WHERE timezone_name LIKE '%$q%' "
-            . " ORDER BY timezone_name "
-            . $range;
-        
-        $DBRESULT = $this->pearDB->query($queryTimezone);
+        $stmt = $this->pearDB->prepare($queryTimePeriod);
+        $stmt->bindParam(':name', $queryValues['name'], PDO::PARAM_STR);
+        if (isset($queryValues['offset'])) {
+            $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
+        }
+        $dbResult = $stmt->execute();
+        if (!$dbResult) {
+            throw new \Exception("An error occured");
+        }
 
-        $total = $this->pearDB->numberRows();
-        
-        $timezoneList = array();
-        while ($data = $DBRESULT->fetchRow()) {
-            $timezoneList[] = array(
-                'id' => $data['timezone_id'],
-                'text' => $data['timezone_name']
+        $timePeriodList = array();
+        while ($data = $stmt->fetch()) {
+            $timePeriodList[] = array(
+                'id' => $data['tp_id'],
+                'text' => $data['tp_name']
             );
         }
-
         return array(
-            'items' => $timezoneList,
-            'total' => $total
+            'items' => $timePeriodList,
+            'total' => $stmt->rowCount()
         );
     }
 }
