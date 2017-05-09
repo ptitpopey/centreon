@@ -72,7 +72,7 @@ class CentreonConfigurationPoller extends CentreonConfigurationObjects
         if (false === isset($this->arguments['q'])) {
             $queryValues['name'] = '';
         } else {
-            $queryValues['name'] = '%' .$this->arguments['q']. '%';
+            $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }
 
         $queryPoller = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT id, name ' .
