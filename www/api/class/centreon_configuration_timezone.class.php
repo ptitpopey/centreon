@@ -37,10 +37,10 @@
 require_once _CENTREON_PATH_ . "/www/class/centreonDB.class.php";
 require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 
-class CentreonConfigurationTimeperiod extends CentreonConfigurationObjects
+class CentreonConfigurationTimezone extends CentreonConfigurationObjects
 {
     /**
-     * CentreonConfigurationTimeperiod constructor.
+     * CentreonConfigurationTimezone constructor.
      */
     public function __construct()
     {
@@ -53,23 +53,25 @@ class CentreonConfigurationTimeperiod extends CentreonConfigurationObjects
     public function getList()
     {
         $queryValues = array();
+
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
             $queryValues['name'] = '%%';
         } else {
             $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }
-        $queryTimePeriod = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT tp_id, tp_name ' .
-            'FROM timeperiod ' .
-            'WHERE tp_name LIKE ? ' .
-            'ORDER BY tp_name ';
+
+        $queryTimezone = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT timezone_id, timezone_name ' .
+            'FROM timezone ' .
+            'WHERE timezone_name LIKE :name ' .
+            'ORDER BY timezone_name ';
         if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
             $offset = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
-            $queryTimePeriod .= 'LIMIT :offset,:limit';
+            $queryTimezone .= 'LIMIT :offset,:limit';
             $queryValues['offset'] = $offset;
             $queryValues['limit'] = $this->arguments['page_limit'];
         }
-        $stmt = $this->pearDB->prepare($queryTimePeriod);
+        $stmt = $this->pearDB->prepare($queryTimezone);
         $stmt->bindParam(':name', $queryValues['name'], PDO::PARAM_STR);
         if (isset($queryValues['offset'])) {
             $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
@@ -80,15 +82,15 @@ class CentreonConfigurationTimeperiod extends CentreonConfigurationObjects
             throw new \Exception("An error occured");
         }
 
-        $timePeriodList = array();
+        $timezoneList = array();
         while ($data = $stmt->fetch()) {
-            $timePeriodList[] = array(
-                'id' => $data['tp_id'],
-                'text' => $data['tp_name']
+            $timezoneList[] = array(
+                'id' => $data['timezone_id'],
+                'text' => $data['timezone_name']
             );
         }
         return array(
-            'items' => $timePeriodList,
+            'items' => $timezoneList,
             'total' => $stmt->rowCount()
         );
     }

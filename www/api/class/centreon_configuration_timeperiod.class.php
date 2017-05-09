@@ -13,7 +13,7 @@
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, see <htcontact://www.gnu.org/licenses>.
+ * this program; if not, see <http://www.gnu.org/licenses>.
  *
  * Linking this program statically or dynamically with other modules is making a
  * combined work based on this program. Thus, the terms and conditions of the GNU
@@ -35,12 +35,12 @@
 
 
 require_once _CENTREON_PATH_ . "/www/class/centreonDB.class.php";
-require_once dirname(__FILE__) . "/centreon_configuration_service.class.php";
+require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 
-class CentreonConfigurationServicetemplate extends CentreonConfigurationService
+class CentreonConfigurationTimeperiod extends CentreonConfigurationObjects
 {
     /**
-     * CentreonConfigurationServicetemplate constructor.
+     * CentreonConfigurationTimeperiod constructor.
      */
     public function __construct()
     {
@@ -52,57 +52,25 @@ class CentreonConfigurationServicetemplate extends CentreonConfigurationService
      */
     public function getList()
     {
-        $range = array();
+        $queryValues = array();
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $q = '';
+            $queryValues['name'] = '%%';
         } else {
-            $q = $this->arguments['q'];
+            $queryValues['name'] = '%' . $this->arguments['q'] . '%';
         }
-
-        if (false === isset($this->arguments['l'])) {
-            $l = '0';
-        } else {
-            $l = $this->arguments['l'];
-        }
-
+        $queryTimePeriod = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT tp_id, tp_name ' .
+            'FROM timeperiod ' .
+            'WHERE tp_name LIKE ? ' .
+            'ORDER BY tp_name ';
         if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
             $offset = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
-            $range[] = (int)$offset;
-            $range[] = (int)$this->arguments['page_limit'];
+            $queryTimePeriod .= 'LIMIT :offset,:limit';
+            $queryValues['offset'] = $offset;
+            $queryValues['limit'] = $this->arguments['page_limit'];
         }
-
-        if ($l == '1') {
-            $serviceTemplateList = $this->listWithHostTemplate($q, $range);
-        } else {
-            $serviceTemplateList = $this->listClassic($q, $range);
-        }
-        return $serviceTemplateList;
-    }
-
-    /**
-     * @param $q
-     * @param array $range
-     * @return array
-     * @throws Exception
-     */
-    private function listClassic($q, $range = array())
-    {
-        $serviceList = array();
-        $queryValues = array();
-        $queryContact = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT service_id, service_description ' .
-            'FROM service ' .
-            'WHERE service_description LIKE :description ' .
-            'AND service_register = "0" ' .
-            'ORDER BY service_description ';
-        $queryValues['description'] = '%' . $q . '%';
-        if (isset($range)) {
-            $queryContact .= 'LIMIT :offset, :limit';
-            $queryValues['offset'] = $range[0];
-            $queryValues['limit'] = $range[1];
-        }
-        $stmt = $this->pearDB->prepare($queryContact);
-        $stmt->bindParam(':description', $queryValues['description'], PDO::PARAM_STR);
+        $stmt = $this->pearDB->prepare($queryTimePeriod);
+        $stmt->bindParam(':name', $queryValues['name'], PDO::PARAM_STR);
         if (isset($queryValues['offset'])) {
             $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
             $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
@@ -112,62 +80,15 @@ class CentreonConfigurationServicetemplate extends CentreonConfigurationService
             throw new \Exception("An error occured");
         }
 
+        $timePeriodList = array();
         while ($data = $stmt->fetch()) {
-            $serviceList[] = array('id' => $data['service_id'], 'text' => $data['service_description']);
-        }
-        return array(
-            'items' => $serviceList,
-            'total' => $stmt->rowCount()
-        );
-    }
-
-    /**
-     * @param string $q
-     * @param array $range
-     * @return array
-     * @throws Exception
-     */
-    private function listWithHostTemplate($q = '', $range = array())
-    {
-        $queryValues = array();
-        $queryValues['description'] = '%' . $q . '%';
-        $queryService = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT s.service_description, s.service_id, ' .
-            'h.host_name, h.host_id ' .
-            'FROM host h, service s, host_service_relation hsr ' .
-            'WHERE hsr.host_host_id = h.host_id ' .
-            'AND hsr.service_service_id = s.service_id ' .
-            'AND h.host_register = "0" ' .
-            'AND s.service_register = "0" ' .
-            'AND s.service_description LIKE :description ' .
-            'ORDER BY h.host_name ';
-        if (isset($range)) {
-            $queryService .= 'LIMIT :offset, :limit';
-            $queryValues['offset'] = $range[0];
-            $queryValues['limit'] = $range[1];
-        }
-        $stmt = $this->pearDB->prepare($queryService);
-        $stmt->bindParam(':description', $queryValues['description'], PDO::PARAM_STR);
-        if (isset($queryValues['offset'])) {
-            $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
-            $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
-        }
-        $dbResult = $stmt->execute();
-        if (!$dbResult) {
-            throw new \Exception("An error occured");
-        }
-
-        $serviceList = array();
-        while ($data = $stmt->fetch()) {
-            $serviceCompleteName = $data['host_name'] . ' - ' . $data['service_description'];
-            $serviceCompleteId = $data['host_id'] . '-' . $data['service_id'];
-
-            $serviceList[] = array(
-                'id' => htmlentities($serviceCompleteId),
-                'text' => $serviceCompleteName
+            $timePeriodList[] = array(
+                'id' => $data['tp_id'],
+                'text' => $data['tp_name']
             );
         }
         return array(
-            'items' => $serviceList,
+            'items' => $timePeriodList,
             'total' => $stmt->rowCount()
         );
     }
