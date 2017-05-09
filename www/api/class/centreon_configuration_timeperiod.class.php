@@ -81,9 +81,10 @@ class CentreonConfigurationServicetemplate extends CentreonConfigurationService
     }
 
     /**
-     *
-     * @param string $q
+     * @param $q
+     * @param array $range
      * @return array
+     * @throws Exception
      */
     private function listClassic($q, $range = array())
     {
@@ -121,9 +122,10 @@ class CentreonConfigurationServicetemplate extends CentreonConfigurationService
     }
 
     /**
-     *
      * @param string $q
+     * @param array $range
      * @return array
+     * @throws Exception
      */
     private function listWithHostTemplate($q = '', $range = array())
     {
