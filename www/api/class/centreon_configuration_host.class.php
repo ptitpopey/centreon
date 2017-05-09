@@ -58,9 +58,8 @@ class CentreonConfigurationHost extends CentreonConfigurationObjects
     }
 
     /**
-     *
-     * @param array $args
      * @return array
+     * @throws Exception
      */
     public function getList()
     {

@@ -40,7 +40,7 @@ require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 class CentreonConfigurationCommand extends CentreonConfigurationObjects
 {
     /**
-     * Constructor
+     * CentreonConfigurationCommand constructor.
      */
     public function __construct()
     {

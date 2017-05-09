@@ -56,6 +56,7 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
 
     /**
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
@@ -113,6 +114,10 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
         );
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function getHostList()
     {
         global $centreon;

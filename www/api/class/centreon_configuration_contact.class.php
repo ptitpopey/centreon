@@ -39,7 +39,7 @@ require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 class CentreonConfigurationContact extends CentreonConfigurationObjects
 {
     /**
-     * Constructor
+     * CentreonConfigurationContact constructor.
      */
     public function __construct()
     {
@@ -47,7 +47,6 @@ class CentreonConfigurationContact extends CentreonConfigurationObjects
     }
 
     /**
-     *
      * @return array
      */
     public function getList()

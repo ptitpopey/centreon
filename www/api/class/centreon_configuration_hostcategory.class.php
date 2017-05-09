@@ -46,7 +46,7 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
     protected $pearDBMonitoring;
 
     /**
-     *
+     * CentreonConfigurationHostcategory constructor.
      */
     public function __construct()
     {
@@ -55,9 +55,8 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
     }
 
     /**
-     *
-     * @param array $args
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
@@ -125,16 +124,16 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
             throw new \Exception("An error occured");
         }
 
-        $hostcategoryList = array();
+        $hostCategoryList = array();
         while ($data = $dbResult->fetchRow()) {
-            $hostcategoryList[] = array(
+            $hostCategoryList[] = array(
                 'id' => htmlentities($data['hc_id']),
                 'text' => $data['hc_name']
             );
         }
 
         return array(
-            'items' => $hostcategoryList,
+            'items' => $hostCategoryList,
             'total' => $stmt->rowCount()
         );
     }

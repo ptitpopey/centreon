@@ -40,9 +40,7 @@ require_once dirname(__FILE__) . "/webService.class.php";
 class CentreonAdministrationWidget extends CentreonWebService
 {
     /**
-     * Constructor
-     *
-     * @return void
+     * CentreonAdministrationWidget constructor.
      */
     public function __construct()
     {
@@ -51,6 +49,7 @@ class CentreonAdministrationWidget extends CentreonWebService
 
     /**
      * Get the list of views
+     * @return array
      */
     public function getList()
     {

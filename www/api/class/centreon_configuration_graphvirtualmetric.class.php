@@ -47,10 +47,11 @@ class CentreonConfigurationGraphvirtualmetric extends CentreonConfigurationObjec
     }
 
     /**
-     *
-     * @param integer $id
+     * @param $currentObject
+     * @param int $id
      * @param string $field
      * @return array
+     * @throws Exception
      */
     protected function retrieveSimpleValues($currentObject, $id, $field)
     {
