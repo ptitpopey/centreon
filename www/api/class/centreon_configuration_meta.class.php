@@ -49,6 +49,7 @@ class CentreonConfigurationMeta extends CentreonConfigurationObjects
 
     /**
      * @return array
+     * @throws Exception
      */
     public function getList()
     {
@@ -98,7 +99,7 @@ class CentreonConfigurationMeta extends CentreonConfigurationObjects
         }
 
         $metaList = array();
-        while ($data = $dbResult->fetchRow()) {
+        while ($data =  $stmt->fetch()) {
             $metaList[] = array(
                 'id' => $data['meta_id'],
                 'text' => $data['meta_name']

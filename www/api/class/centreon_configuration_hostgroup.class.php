@@ -103,13 +103,13 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
             throw new \Exception("An error occured");
         }
 
-        $hostgroupList = array();
-        while ($data = $dbResult->fetchRow()) {
-            $hostgroupList[] = array('id' => htmlentities($data['hg_id']), 'text' => $data['hg_name']);
+        $hostGroupList = array();
+        while ($data = $stmt->fetch()) {
+            $hostGroupList[] = array('id' => htmlentities($data['hg_id']), 'text' => $data['hg_name']);
         }
 
         return array(
-            'items' => $hostgroupList,
+            'items' => $hostGroupList,
             'total' => $stmt->rowCount()
         );
     }
@@ -179,7 +179,7 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
         }
 
         $hostList = array();
-        while ($data = $dbResult->fetchRow()) {
+        while ($data = $stmt->fetch()) {
             $hostList[] = array(
                 'id' => htmlentities($data['host_id']),
                 'text' => $data['host_name']

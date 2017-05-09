@@ -154,7 +154,7 @@ class CentreonConfigurationHost extends CentreonConfigurationObjects
         }
 
         $hostList = array();
-        while ($data = $dbResult->fetchRow()) {
+        while ($data = $stmt->fetch()) {
             $hostList[] = array(
                 'id' => htmlentities($data['host_id']),
                 'text' => $data['host_name']

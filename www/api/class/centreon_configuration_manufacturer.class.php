@@ -86,7 +86,7 @@ class CentreonConfigurationManufacturer extends CentreonConfigurationObjects
         }
 
         $manufacturerList = array();
-        while ($data = $dbResult->fetchRow()) {
+        while ($data = $stmt->fetch()) {
             $manufacturerList[] = array('id' => $data['id'], 'text' => $data['name']);
         }
 

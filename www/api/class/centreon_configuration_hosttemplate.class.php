@@ -86,9 +86,12 @@ class CentreonConfigurationHosttemplate extends CentreonConfigurationObjects
             $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
         }
         $dbResult = $stmt->execute();
+        if (!$dbResult) {
+            throw new \Exception("An error occured");
+        }
 
         $hostList = array();
-        while ($data = $dbResult->fetchRow()) {
+        while ($data = $stmt->fetch()) {
             $hostList[] = array(
                 'id' => htmlentities($data['host_id']),
                 'text' => $data['host_name']

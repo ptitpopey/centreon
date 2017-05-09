@@ -87,7 +87,7 @@ class CentreonConfigurationDowntime extends CentreonConfigurationObjects
         }
 
         $downtimeList = array();
-        while ($data = $stmt->fetchRow()) {
+        while ($data = $stmt->fetch()) {
             $downtimeList[] = array(
                 'id' => htmlentities($data['dt_id']),
                 'text' => $data['dt_name']
