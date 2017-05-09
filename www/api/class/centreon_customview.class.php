@@ -74,7 +74,7 @@ class CentreonHomeCustomview extends CentreonWebService
             'AND cvur2.is_consumed = 1) ';
 
         $dbResult = $this->pearDB->query($query);
-        while ($row = $dbResult->fetchRow()) {
+        while ($row = $dbResult->fetch()) {
             $views[] = array(
                 'id' => $row['custom_view_id'],
                 'text' => $row['name']
