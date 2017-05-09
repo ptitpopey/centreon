@@ -140,11 +140,11 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
         // Check for select2 'q' argument
         if (false === isset($this->arguments['hgid'])) {
             $queryValues['hgid'][0] = '""';
-            $hgIdList = ':hgid0';
+            $hgIdList .= ':hgid0';
         } else {
             $listId = explode(',', $this->arguments['hgid']);
             foreach ($listId as $key => $idHg) {
-                $hgIdList = ':hgid' . $idHg . ',';
+                $hgIdList .= ':hgid' . $idHg . ',';
                 $queryValues['hgid'][$idHg] = $idHg;
             }
             $hgIdList = rtrim($hgIdList, ',');
