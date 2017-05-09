@@ -149,7 +149,7 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
             'FROM hostgroup hg ' .
             'INNER JOIN hostgroup_relation hgr ON hg.hg_id = hgr.hostgroup_hg_id ' .
             'INNER JOIN host h ON  h.host_id = hgr.host_host_id ' .
-            'WHERE hg.hg_id IN ('.$hgIdList.') ' .
+            'WHERE hg.hg_id IN (' . $hgIdList . ') ' .
             $aclHostGroups .
             $aclHosts;
 
@@ -161,8 +161,8 @@ class CentreonConfigurationHostgroup extends CentreonConfigurationObjects
         }
         $stmt = $this->pearDB->prepare($queryHostGroup);
 
-        foreach ($queryValues["hgid"] as $k => $v){
-            $stmt->bindParam(':hgid'.$k, $v, PDO::PARAM_INT);
+        foreach ($queryValues["hgid"] as $k => $v) {
+            $stmt->bindParam(':hgid' . $k, $v, PDO::PARAM_INT);
         }
         if (isset($queryValues['offset'])) {
             $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
