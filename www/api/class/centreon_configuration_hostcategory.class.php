@@ -39,10 +39,9 @@ require_once dirname(__FILE__) . "/centreon_configuration_objects.class.php";
 
 class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
 {
-    
+
     /**
-     *
-     * @var type
+     * @var CentreonDB
      */
     protected $pearDBMonitoring;
 
@@ -54,7 +53,7 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
         parent::__construct();
         $this->pearDBMonitoring = new CentreonDB('centstorage');
     }
-    
+
     /**
      *
      * @param array $args
@@ -63,11 +62,12 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
     public function getList()
     {
         global $centreon;
-        
+
+        $queryValues = array();
         $userId = $centreon->user->user_id;
         $isAdmin = $centreon->user->admin;
         $aclHostCategories = '';
-        
+
         /* Get ACL if user is not admin */
         if (!$isAdmin) {
             $acl = new CentreonACL($userId, $isAdmin);
@@ -87,49 +87,55 @@ class CentreonConfigurationHostcategory extends CentreonConfigurationObjects
         } else {
             $t = $this->arguments['t'];
         }
-        
+
         // Check for select2 'q' argument
         if (false === isset($this->arguments['q'])) {
-            $q = '';
+            $queryValues['hcName'] = '';
         } else {
-            $q = $this->arguments['q'];
+            $queryValues['hcName'] = '%' . $this->arguments['q'] . '%';
         }
 
-        if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
-            $limit = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
-            $range = 'LIMIT ' . $limit . ',' . $this->arguments['page_limit'];
-        } else {
-            $range = '';
-        }
-        
-        $queryHostcategory = "SELECT SQL_CALC_FOUND_ROWS DISTINCT hc.hc_name, hc.hc_id "
-            . "FROM hostcategories hc "
-            . "WHERE hc.hc_name LIKE '%$q%' "
-            . $aclHostCategories;
+        $queryHostCategory = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT hc.hc_name, hc.hc_id ' .
+            'FROM hostcategories hc ' .
+            'WHERE hc.hc_name LIKE :hcName ' .
+            $aclHostCategories;
         if (!empty($t) && $t == 'c') {
-            $queryHostcategory .= "AND level IS NULL ";
+            $queryHostCategory .= 'AND level IS NULL ';
         }
         if (!empty($t) && $t == 's') {
-            $queryHostcategory .= "AND level IS NOT NULL ";
+            $queryHostCategory .= 'AND level IS NOT NULL ';
         }
-        $queryHostcategory .= "ORDER BY hc.hc_name "
-            . $range;
-        
-        $DBRESULT = $this->pearDB->query($queryHostcategory);
+        $queryHostCategory .= 'ORDER BY hc.hc_name ';
 
-        $total = $this->pearDB->numberRows();
-        
+        if (isset($this->arguments['page_limit']) && isset($this->arguments['page'])) {
+            $offset = ($this->arguments['page'] - 1) * $this->arguments['page_limit'];
+            $queryHostCategory .= 'LIMIT :offset, :limit';
+            $queryValues['offset'] = $offset;
+            $queryValues['limit'] = $this->arguments['page_limit'];
+        }
+
+        $stmt = $this->pearDB->prepare($queryHostCategory);
+        $stmt->bindParam(':hcName', $queryValues['hcName'], PDO::PARAM_STR);
+        if (isset($queryValues['offset'])) {
+            $stmt->bindParam(':offset', $queryValues["offset"], PDO::PARAM_INT);
+            $stmt->bindParam(':limit', $queryValues["limit"], PDO::PARAM_INT);
+        }
+        $dbResult = $stmt->execute();
+        if (!$dbResult) {
+            throw new \Exception("An error occured");
+        }
+
         $hostcategoryList = array();
-        while ($data = $DBRESULT->fetchRow()) {
+        while ($data = $dbResult->fetchRow()) {
             $hostcategoryList[] = array(
                 'id' => htmlentities($data['hc_id']),
                 'text' => $data['hc_name']
             );
         }
-        
+
         return array(
             'items' => $hostcategoryList,
-            'total' => $total
+            'total' => $stmt->rowCount()
         );
     }
 }
